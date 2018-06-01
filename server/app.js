@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-app.use(bodyParser.json);
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 //PAGE NOT FOUND
@@ -17,4 +17,4 @@ app.listen(port, (req, res) => {
 })
 
 //DATABASE CONNECTION
-mongoose.connect()
+mongoose.connect('mongodb://satellite:sci15csc067@ds139690.mlab.com:39690/satellite')

@@ -51,11 +51,76 @@ exports.registerUser = async (req, res) => {
             dish1:body.dish1,
             dish2:body.dish2,
             dish3:body.dish3,
-            password:hashpassword
+            password:hashpassword,
+            confirmPassword:body.confirmPassword.equals(hashpassword)
         })
         const token = jwt.sign({id:customer.id}, config.secret);
         res.json({
-            message:`Customer successfully created`
+            message:`Customer successfully created`,
+            token:token
+        })
+    }
+}
+// GETTING REAL ID OF CUSTOMER
+exports.getToken = async (req, res, next) => {
+    const token = req.headers['x-access-token']
+    if (!token) {
+        res.json({
+            message:`No token provided`
+        })
+    }
+    else {
+        await jwt.verify(token, config.secret, (err, decoded) => {
+            if (err) {
+                res.json({
+                    message:`An error occur`
+                })
+            }
+            else {
+                customer.findById(req.customerId, {password:0}, (err, customer) => {
+                    if (err) {
+                        res.json({
+                            message:`Unable to complete due to error from server`
+                        })
+                    }
+                    else if (!customer) {
+                        res.json({
+                            message:`No customer found`
+                        })
+                    }
+                    else {
+                        res.json({
+                            message:`Token decoded successfully`,
+                            customer:customer
+                        })
+                    }
+                })
+            }
+        })
+    }
+}
+// LOGIN
+exports.loginCustomer = async (req, res) => {
+    if (!req.body.email && !req.body.password) {
+        res.json({
+            message:`Please fill all required  input fields`
+        })
+    }
+    else {
+        await customer.findOne({email:req.body.email}, (err, customer) => {
+            if (err) {
+                res.json({
+                    message:`An Error from the server stop user from logging`
+                })
+            }
+            else {
+                const token = jwt.sign({id:customer.id}, config.secret);
+                res.json({
+                    message:`Login was successful`,
+                    auth:true,
+                    token:token
+                })
+            }
         })
     }
 }
